@@ -352,6 +352,15 @@ details.acc > .acc-body {
   animation: spin 0.9s linear infinite;
 }
 
+/* Aviso del cuadro de pregunta: sacudida corta */
+@keyframes shake {
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+.shake {
+  animation: shake 0.4s ease-in-out;
+}
+
 /* Cursor de streaming */
 @keyframes blink {
   50% {
@@ -459,6 +468,7 @@ details.acc > .acc-body {
   .shimmer,
   .spin,
   .settle,
+  .shake,
   .caret::after {
     animation: none;
   }

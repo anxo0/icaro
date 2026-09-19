@@ -49,6 +49,9 @@ function isPdf(file: File): boolean {
 export function PromptInput({ t, doc, device, devicePref, gpuAvailable, onDevicePref, llmKey, onLlmKey, modelLocked, generating, canAsk, onAsk, onStop, onFile, autoFocus, mentions, onRemoveMention, onTogglePreview, previewOpen }: Props) {
   const [draft, setDraft] = useState('');
   const [fileError, setFileError] = useState<string | null>(null);
+  /** Aviso al intentar enviar sin PDF o con el documento aún preparándose. */
+  const [nudge, setNudge] = useState<string | null>(null);
+  const [shaking, setShaking] = useState(false);
   const textarea = useRef<HTMLTextAreaElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const fileId = useId();
@@ -86,7 +89,13 @@ export function PromptInput({ t, doc, device, devicePref, gpuAvailable, onDevice
   const submit = (e?: FormEvent) => {
     e?.preventDefault();
     const q = draft.trim();
-    if (!q || !canAsk) return;
+    if (!q || generating) return;
+    if (!canAsk) {
+      setNudge(doc ? t.prompt.notReady : t.prompt.needPdf);
+      setShaking(true);
+      return;
+    }
+    setNudge(null);
     onAsk(q, mentions);
     setDraft('');
     requestAnimationFrame(resize);
@@ -111,8 +120,25 @@ export function PromptInput({ t, doc, device, devicePref, gpuAvailable, onDevice
 
   const placeholder = doc ? t.prompt.placeholder : t.prompt.placeholderNoDoc;
 
+  useEffect(() => {
+    if (!shaking) return;
+    const id = setTimeout(() => setShaking(false), 450);
+    return () => clearTimeout(id);
+  }, [shaking]);
+
+  useEffect(() => {
+    if (!nudge) return;
+    const id = setTimeout(() => setNudge(null), 4000);
+    return () => clearTimeout(id);
+  }, [nudge]);
+
+  // En cuanto se puede preguntar, el aviso sobra.
+  useEffect(() => {
+    if (canAsk) setNudge(null);
+  }, [canAsk]);
+
   return (
-    <form onSubmit={submit} className="glow-border rounded-2xl">
+    <form onSubmit={submit} className={`glow-border rounded-2xl ${shaking ? 'shake' : ''}`}>
       <div className="hairline flex flex-col rounded-2xl bg-surface transition-colors focus-within:border-line-strong">
         {mentions.length > 0 && (
           <ul className="flex flex-wrap gap-1.5 px-3 pt-3" aria-label={t.prompt.mentionLabel}>
@@ -176,6 +202,16 @@ export function PromptInput({ t, doc, device, devicePref, gpuAvailable, onDevice
               {fileError}
             </span>
           )}
+          {nudge && !fileError && (
+            <button
+              type="button"
+              role="alert"
+              onClick={() => (doc ? setNudge(null) : fileInput.current?.click())}
+              className="settle ml-2 truncate rounded-full bg-warn-soft px-2.5 py-1 text-left text-xs text-warn"
+            >
+              {nudge}
+            </button>
+          )}
 
           {doc && (
             <button
@@ -204,7 +240,7 @@ export function PromptInput({ t, doc, device, devicePref, gpuAvailable, onDevice
           ) : (
             <button
               type="submit"
-              disabled={!canAsk || !draft.trim()}
+              disabled={!draft.trim()}
               title={t.prompt.send}
               aria-label={t.prompt.send}
               className={`${doc ? 'ml-1' : 'ml-auto'} inline-flex size-8 items-center justify-center rounded-full bg-ink text-paper transition-[transform,opacity] hover:scale-105 disabled:scale-100 disabled:opacity-30`}

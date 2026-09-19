@@ -138,7 +138,9 @@
       "onlyPdf": "Ícaro only reads PDF files.",
       "shortcuts": "Ctrl/⌘ + K to type · Esc to stop",
       "mentionLabel": "Mentioned passage",
-      "removeMention": "Remove"
+      "removeMention": "Remove",
+      "needPdf": "Attach a PDF first: press + or drop it here.",
+      "notReady": "Ícaro is still preparing the document; one moment."
     },
     "drop": {
       "title": "Drop the PDF",

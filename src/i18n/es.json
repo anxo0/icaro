@@ -138,7 +138,9 @@
       "onlyPdf": "Ícaro solo lee ficheros PDF.",
       "shortcuts": "Ctrl/⌘ + K para escribir · Esc para parar",
       "mentionLabel": "Fragmento mencionado",
-      "removeMention": "Quitar"
+      "removeMention": "Quitar",
+      "needPdf": "Primero adjunta un PDF: pulsa + o suéltalo aquí.",
+      "notReady": "Ícaro todavía está preparando el documento; un momento."
     },
     "drop": {
       "title": "Suelta el PDF",
