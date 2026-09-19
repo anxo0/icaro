@@ -1,0 +1,231 @@
+{
+  "site": {
+    "lang": "es",
+    "title": "Ícaro, tu asistente de PDF",
+    "description": "Sube un PDF, pregúntale en lenguaje natural y te responde citando las páginas. IA privada que corre entera en tu navegador: el documento nunca sube a la nube.",
+    "nav": {
+      "github": "Código en GitHub",
+      "light": "Tema claro",
+      "dark": "Tema oscuro",
+      "lang": "Idioma / Language"
+    },
+    "sidebar": {
+      "label": "Barra lateral",
+      "open": "Abrir la barra lateral",
+      "close": "Cerrar la barra lateral"
+    },
+    "hero": {
+      "kicker": "IA privada en el navegador",
+      "title": "Ícaro, tu asistente de PDF",
+      "claim": "Vuela bajo: tu PDF nunca sube a la nube.",
+      "lead": "Suelta un PDF, pregunta en tu idioma y te responde citando las páginas. Todo pasa en tu navegador: ni el documento ni las preguntas salen de tu equipo.",
+      "badges": [
+        "Sin servidor",
+        "Sin cuenta",
+        "Sin analítica",
+        "Código abierto"
+      ]
+    },
+    "noscript": "Ícaro necesita JavaScript: el PDF se lee y el modelo se ejecuta en tu navegador. No hay servidor al que enviarlo.",
+    "how": {
+      "title": "Cómo funciona",
+      "lead": "Cinco pasos, todos en tu máquina. Vercel solo sirve ficheros estáticos; no hay funciones, claves ni coste.",
+      "steps": [
+        {
+          "title": "Lee el PDF",
+          "text": "pdf.js extrae el texto página a página dentro de un Web Worker. El fichero no se envía a ningún sitio."
+        },
+        {
+          "title": "Lo trocea y lo indexa",
+          "text": "El texto se parte en trozos de unos 350 tokens sin mezclar páginas, y un modelo de embeddings multilingüe convierte cada trozo en un vector."
+        },
+        {
+          "title": "Lo recuerda",
+          "text": "Trozos y vectores se guardan en IndexedDB con el hash del fichero. La segunda vez que sueltes el mismo PDF, es instantáneo."
+        },
+        {
+          "title": "Busca lo relevante",
+          "text": "Tu pregunta se convierte en otro vector y se comparan por coseno: los cinco trozos más parecidos son el contexto."
+        },
+        {
+          "title": "Responde citando",
+          "text": "Un modelo pequeño responde solo con esos trozos, en streaming, y cita las páginas así: [p. 12]. Si no está en el documento, lo dice."
+        }
+      ]
+    },
+    "models": {
+      "title": "Modelos y requisitos",
+      "lead": "Se descargan de Hugging Face la primera vez que sueltas un PDF (no al abrir la página) y el navegador los guarda en caché.",
+      "columns": [
+        "Tarea",
+        "Modelo",
+        "Peso",
+        "Notas"
+      ],
+      "rows": [
+        [
+          "Embeddings",
+          "Xenova/multilingual-e5-small",
+          "≈ 120 MB",
+          "384 dimensiones, multilingüe. Cuantizado a 8 bits."
+        ],
+        [
+          "Generación",
+          "onnx-community/Qwen2.5-0.5B-Instruct",
+          "≈ 400 MB",
+          "Responde bien en español para su tamaño. Cuantizado a 4 bits."
+        ],
+        [
+          "Generación (rápido)",
+          "HuggingFaceTB/SmolLM2-360M-Instruct",
+          "≈ 250 MB",
+          "Más ligero, peor en español. Para equipos con poca memoria."
+        ]
+      ],
+      "requirements": "Recomendado: Chrome o Edge con WebGPU y 4 GB de RAM libres. Sin WebGPU funciona con WebAssembly, pero la generación es mucho más lenta."
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "items": [
+        {
+          "q": "¿De verdad no sube nada?",
+          "a": "Nada. Abre la pestaña Red de tu navegador: durante la primera carga verás descargas de huggingface.co (los pesos del modelo) y después, ninguna petición. El PDF se lee en memoria y nunca sale de tu equipo."
+        },
+        {
+          "q": "¿Qué se descarga y cuánto pesa?",
+          "a": "Dos modelos: uno de embeddings (unos 120 MB) y uno de generación (unos 400 MB, o 250 con la opción rápida). Se bajan una sola vez y quedan en la caché del navegador."
+        },
+        {
+          "q": "¿Funciona sin WebGPU?",
+          "a": "Sí, con WebAssembly. La lectura y la búsqueda van igual de rápido; la generación de la respuesta es bastante más lenta. Firefox y Safari suelen caer en este caso."
+        },
+        {
+          "q": "¿Sirve con PDF escaneados?",
+          "a": "Todavía no. Un escaneo es una imagen y no tiene texto que extraer; haría falta OCR. Está en la lista para una segunda versión."
+        },
+        {
+          "q": "¿Qué tamaño de PDF aguanta?",
+          "a": "Cientos de páginas sin problema: 300 páginas son unos 1.500 vectores y la búsqueda es instantánea. Lo que tarda es el indexado la primera vez, y depende de tu máquina."
+        },
+        {
+          "q": "¿Dónde se guarda todo y cómo lo borro?",
+          "a": "Los modelos en la caché del navegador, los documentos indexados en IndexedDB y los chats en localStorage; todo en tu equipo. «Borrar todo» lo limpia."
+        },
+        {
+          "q": "¿Se equivoca?",
+          "a": "A veces. Es un modelo de 500 millones de parámetros, no un servicio en la nube: puede confundir datos que están cerca en el texto. Las citas [p. N] están para que lo compruebes."
+        },
+        {
+          "q": "¿Por qué Ícaro?",
+          "a": "Ícaro voló demasiado cerca del sol. Este no sube a la nube."
+        }
+      ]
+    },
+    "footer": {
+      "made": "Hecho por",
+      "source": "código",
+      "note": "Sin analítica, sin cookies, sin servidor. Lo único que se descarga son los modelos, y solo cuando sueltas un PDF."
+    }
+  },
+  "app": {
+    "prompt": {
+      "placeholder": "Pregunta a Ícaro sobre el documento…",
+      "placeholderNoDoc": "Suelta un PDF aquí o púlsalo con + para empezar",
+      "attach": "Adjuntar PDF",
+      "send": "Enviar",
+      "stop": "Parar",
+      "model": "Modelo de respuesta",
+      "onlyPdf": "Ícaro solo lee ficheros PDF.",
+      "shortcuts": "Ctrl/⌘ + K para escribir · Esc para parar",
+      "mentionLabel": "Fragmento mencionado",
+      "removeMention": "Quitar"
+    },
+    "drop": {
+      "title": "Suelta el PDF",
+      "hint": "Se lee en tu navegador. Nunca sale de tu equipo."
+    },
+    "device": {
+      "webgpu": "WebGPU disponible",
+      "wasm": "Sin WebGPU: irá más lento",
+      "lowMemory": "Poca memoria: se recomienda el modelo rápido",
+      "title": "Aceleración",
+      "gpuOption": "WebGPU · rápido",
+      "wasmOption": "WebAssembly · compatible",
+      "unavailable": "no disponible en este navegador",
+      "reload": "Al cambiar se recargan los modelos."
+    },
+    "models": {
+      "options": {
+        "qwen": "Qwen2.5 0.5B · español",
+        "smol": "SmolLM2 360M · rápido"
+      }
+    },
+    "activity": {
+      "reading": "Ícaro está leyendo {name}…",
+      "readStep": "Leer el PDF",
+      "readDetail": "página {page} de {total}",
+      "readDone": "{n} páginas",
+      "readDoneOne": "1 página",
+      "modelsStep": "Descargar los modelos",
+      "modelsDetail": "{loaded} de {total} MB",
+      "modelsLoading": "cargando en memoria",
+      "modelsCached": "ya en el navegador",
+      "downloading": "Ícaro está descargando los modelos…",
+      "indexing": "Ícaro está indexando el documento…",
+      "indexStep": "Indexar",
+      "indexDetail": "{done} de {total} trozos",
+      "indexCached": "recuperado de la caché",
+      "indexDone": "{n} trozos",
+      "ready": "Documento listo en {sec} s",
+      "readyCached": "Documento recuperado al instante",
+      "thinking": "Ícaro está pensando…",
+      "searchStep": "Buscar en el documento",
+      "searchDetail": "{n} fragmentos",
+      "writeStep": "Redactar la respuesta",
+      "answered": "Fuentes ({n}) · {sec} s",
+      "answeredNone": "Sin fuentes",
+      "failed": "Algo ha fallado",
+      "noText": "Ícaro no encuentra texto en este PDF. Si es un escaneo, no puede leerlo sin OCR.",
+      "webgpuFallback": "WebGPU ha fallado; Ícaro sigue con WebAssembly (más lento).",
+      "missingIndex": "El índice de este PDF ya no está en el navegador. Vuelve a soltarlo para seguir preguntando."
+    },
+    "chat": {
+      "you": "Tú",
+      "icaro": "Ícaro",
+      "suggestedTitle": "Prueba con",
+      "suggested": [
+        "¿De qué trata?",
+        "Resume en 5 puntos",
+        "¿Qué fechas aparecen?"
+      ],
+      "notFound": "Ícaro no lo encuentra en el documento.",
+      "interrupted": "parado",
+      "stats": "{tokens} tokens · {sec} s",
+      "sourcesLead": "Fragmentos usados en esta respuesta",
+      "page": "p. {n}"
+    },
+    "list": {
+      "title": "Chats",
+      "new": "Nuevo chat",
+      "empty": "Aquí aparecerán tus chats. Se guardan en este navegador.",
+      "delete": "Borrar chat",
+      "meta": "{pages} pág. · {n} preguntas",
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "week": "Últimos 7 días",
+      "older": "Anteriores"
+    },
+    "doc": {
+      "clear": "Borrar todo",
+      "clearTitle": "Borra los chats, los documentos indexados y los modelos descargados de este navegador"
+    },
+    "preview": {
+      "open": "Ver el PDF",
+      "close": "Cerrar el visor",
+      "pages": "{n} páginas",
+      "page": "p. {n}",
+      "mention": "Mencionar",
+      "unavailable": "El PDF de este chat ya no está en el navegador: vuelve a soltarlo para verlo."
+    }
+  }
+}

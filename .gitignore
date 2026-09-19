@@ -1,0 +1,27 @@
+# build
+dist/
+.astro/
+.vercel/
+
+# deps
+node_modules/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# env
+.env
+.env.*
+!.env.example
+
+# editors / os
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# assets copiados de node_modules por scripts/copy-assets.mjs
+public/ort/
+public/pdfjs/

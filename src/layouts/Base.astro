@@ -1,0 +1,121 @@
+---
+import '@/styles/global.css';
+import { Icon } from 'astro-icon/components';
+import Sidebar from '@/components/Sidebar.astro';
+import ThemeToggle from '@/components/ThemeToggle.astro';
+import { REPO_URL, type Lang, type Strings } from '@/i18n';
+
+interface Props {
+  lang: Lang;
+  strings: Strings;
+}
+const { lang, strings } = Astro.props;
+const t = strings.site;
+const site = Astro.site ?? new URL('https://icaro.soyjulian.dev');
+const path = lang === 'es' ? '/' : '/en/';
+const canonical = new URL(path, site).href;
+const alternates: { lang: Lang; href: string }[] = [
+  { lang: 'es', href: new URL('/', site).href },
+  { lang: 'en', href: new URL('/en/', site).href },
+];
+---
+
+<!doctype html>
+<html lang={lang} data-theme="dark" data-sidebar="open">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{t.title}</title>
+    <meta name="description" content={t.description} />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#1c1c20" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+    <link rel="alternate" hreflang="x-default" href={alternates[0]!.href} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={t.title} />
+    <meta property="og:description" content={t.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_US'} />
+    <meta property="og:image" content={new URL('/og.png', site).href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      // Tema y estado de la barra antes del primer pintado. Oscuro y barra abierta por defecto (cerrada en móvil).
+      (function () {
+        var d = document.documentElement;
+        var t = 'dark';
+        var s = 'open';
+        try {
+          var st = localStorage.getItem('icaro:theme');
+          if (st === 'light' || st === 'dark') t = st;
+          var ss = localStorage.getItem('icaro:sidebar');
+          if (ss === 'open' || ss === 'closed') s = ss;
+        } catch (e) {}
+        if (window.matchMedia('(max-width: 1023px)').matches) s = 'closed';
+        d.dataset.theme = t;
+        d.dataset.sidebar = s;
+      })();
+    </script>
+  </head>
+  <body>
+    <button
+      type="button"
+      data-sidebar-toggle
+      class="sidebar-toggle inline-flex size-9 items-center justify-center rounded-lg text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+      data-label-open={t.sidebar.open}
+      data-label-close={t.sidebar.close}
+      aria-label={t.sidebar.close}
+      title={t.sidebar.close}
+    >
+      <Icon name="solar:sidebar-minimalistic-linear" class="size-5" />
+    </button>
+    <div class="shell">
+      <Sidebar lang={lang} strings={strings} />
+      <div class="flex min-h-dvh min-w-0 flex-col">
+        <header class="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-2 bg-paper/85 px-3 backdrop-blur sm:px-4">
+          <div class="flex items-center gap-1 pl-10">
+            <a href={path} class="ml-1 text-[15px] font-semibold tracking-tight text-ink lg:hidden">Ícaro</a>
+          </div>
+          <nav class="flex items-center gap-1">
+            <div class="inline-flex text-xs font-medium" role="group" aria-label={t.nav.lang}>
+              {
+                alternates.map((a) => (
+                  <a
+                    href={a.lang === 'es' ? '/' : '/en/'}
+                    hreflang={a.lang}
+                    aria-current={a.lang === lang ? 'page' : undefined}
+                    class:list={[
+                      'rounded-md px-2 py-1 uppercase transition-colors',
+                      a.lang === lang ? 'text-ink' : 'text-ink-3 hover:text-ink',
+                    ]}
+                  >
+                    {a.lang}
+                  </a>
+                ))
+              }
+            </div>
+            <ThemeToggle light={t.nav.light} dark={t.nav.dark} />
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t.nav.github}
+              title={t.nav.github}
+              class="inline-flex size-9 items-center justify-center rounded-lg text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+            >
+              <svg class="size-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"
+                ></path>
+              </svg>
+            </a>
+          </nav>
+        </header>
+        <main class="flex min-h-0 flex-1 flex-col">
+          <slot />
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

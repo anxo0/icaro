@@ -1,0 +1,216 @@
+---
+/**
+ * Barra lateral plegable. Todo es HTML estático (indexable, se ve sin JS) salvo la lista de chats,
+ * que es una isla de React porque lee localStorage y comparte estado con la app.
+ */
+import { Icon } from 'astro-icon/components';
+import Wing from './Wing.astro';
+import ChatList from './app/ChatList';
+import { AUTHOR_URL, REPO_URL, type Lang, type Strings } from '@/i18n';
+
+interface Props {
+  lang: Lang;
+  strings: Strings;
+}
+const { lang, strings } = Astro.props;
+const { site: t, app } = strings;
+const stepIcons = ['solar:document-text-linear', 'solar:layers-minimalistic-linear', 'solar:database-linear', 'solar:magnifer-linear', 'solar:chat-round-dots-linear'];
+---
+
+<div class="sidebar-backdrop" data-sidebar-close aria-hidden="true"></div>
+<aside class="sidebar" aria-label={t.sidebar.label}>
+  <div class="sidebar-inner">
+    <div class="flex h-14 shrink-0 items-center justify-between pr-2 pl-5">
+      <a href={lang === 'es' ? '/' : '/en/'} class="flex items-center gap-2.5 text-ink">
+        <Wing size={22} class="text-accent" />
+        <span class="text-[15px] font-semibold tracking-tight">Ícaro</span>
+      </a>
+      <span class="size-9" aria-hidden="true"></span>
+    </div>
+
+    <ChatList client:only="react" lang={lang} t={app.list} />
+
+    <div class="scrollbar-thin hairline-t max-h-[46%] shrink-0 overflow-y-auto px-3 py-2">
+      <details class="acc group">
+        <summary class="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink">
+          <span class="flex items-center gap-2">
+            <Icon name="solar:routing-2-linear" class="size-4 text-ink-3" />
+            {t.how.title}
+          </span>
+          <Icon name="solar:alt-arrow-down-linear" class="chev size-3.5 text-ink-3" />
+        </summary>
+        <div class="acc-body">
+          <p class="px-3 pt-1 pb-2 text-xs leading-relaxed text-ink-3 text-pretty">{t.how.lead}</p>
+          <ol class="space-y-2 px-3 pb-3">
+            {
+              t.how.steps.map((s, i) => (
+                <li class="flex gap-2.5">
+                  <Icon name={stepIcons[i] ?? stepIcons[0]!} class="mt-0.5 size-4 shrink-0 text-accent-ink" />
+                  <div>
+                    <p class="text-sm font-medium text-ink">{s.title}</p>
+                    <p class="text-xs leading-relaxed text-ink-2 text-pretty">{s.text}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </details>
+
+      <details class="acc group">
+        <summary class="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink">
+          <span class="flex items-center gap-2">
+            <Icon name="solar:cpu-bolt-linear" class="size-4 text-ink-3" />
+            {t.models.title}
+          </span>
+          <Icon name="solar:alt-arrow-down-linear" class="chev size-3.5 text-ink-3" />
+        </summary>
+        <div class="acc-body">
+          <p class="px-3 pt-1 pb-2 text-xs leading-relaxed text-ink-3 text-pretty">{t.models.lead}</p>
+          <ul class="space-y-2 px-3 pb-2">
+            {
+              t.models.rows.map((r) => (
+                <li class="text-xs">
+                  <p class="flex items-baseline justify-between gap-2 text-ink">
+                    <span class="font-medium">{r[0]}</span>
+                    <span class="shrink-0 text-ink-3">{r[2]}</span>
+                  </p>
+                  <a href={`https://huggingface.co/${r[1]}`} target="_blank" rel="noopener noreferrer" class="block truncate text-[11px] text-accent-ink hover:underline">
+                    {r[1]}
+                  </a>
+                  <p class="text-ink-2 text-pretty">{r[3]}</p>
+                </li>
+              ))
+            }
+          </ul>
+          <p class="px-3 pb-3 text-xs leading-relaxed text-ink-3 text-pretty">{t.models.requirements}</p>
+        </div>
+      </details>
+
+      <details class="acc group">
+        <summary class="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink">
+          <span class="flex items-center gap-2">
+            <Icon name="solar:question-circle-linear" class="size-4 text-ink-3" />
+            {t.faq.title}
+          </span>
+          <Icon name="solar:alt-arrow-down-linear" class="chev size-3.5 text-ink-3" />
+        </summary>
+        <div class="acc-body">
+          <div class="divide-y divide-line px-3 pb-2">
+            {
+              t.faq.items.map((item) => (
+                <details class="acc group/faq py-1.5">
+                  <summary class="flex items-start justify-between gap-2 py-1 text-sm text-ink hover:text-accent-ink">
+                    <span class="text-pretty">{item.q}</span>
+                    <Icon name="solar:alt-arrow-down-linear" class="chev mt-1 size-3.5 shrink-0 text-ink-3" />
+                  </summary>
+                  <div class="acc-body">
+                    <p class="pt-1 pb-2 text-xs leading-relaxed text-ink-2 text-pretty">{item.a}</p>
+                  </div>
+                </details>
+              ))
+            }
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="hairline-t shrink-0 px-5 py-3">
+      <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-2">
+        {t.footer.made}
+        <a href={AUTHOR_URL} target="_blank" rel="noopener noreferrer" class="text-ink underline decoration-line-strong underline-offset-4 hover:decoration-accent">Julián</a>
+        <span class="text-ink-3">·</span>
+        <a href={REPO_URL} target="_blank" rel="noopener noreferrer" class="text-ink underline decoration-line-strong underline-offset-4 hover:decoration-accent">{t.footer.source}</a>
+        <span class="text-ink-3">·</span>
+        <span class="text-ink-3">MIT</span>
+      </p>
+      <p class="mt-1.5 text-[11px] leading-relaxed text-ink-3 text-pretty">{t.footer.note}</p>
+      <button
+        type="button"
+        data-clear-all
+        title={app.doc.clearTitle}
+        class="mt-2 inline-flex items-center gap-1.5 text-[11px] text-ink-3 transition-colors hover:text-bad"
+      >
+        <Icon name="solar:trash-bin-minimalistic-linear" class="size-3.5" />
+        {app.doc.clear}
+      </button>
+    </div>
+  </div>
+</aside>
+
+<script>
+  // Plegar/desplegar la barra. El estado inicial lo pone el script inline de Base.astro antes del primer pintado.
+  const KEY = 'icaro:sidebar';
+  const root = document.documentElement;
+  const isMobile = () => window.matchMedia('(max-width: 1023px)').matches;
+  const syncLabel = () => {
+    const btn = document.querySelector<HTMLButtonElement>('.sidebar-toggle');
+    if (!btn) return;
+    const label = root.dataset.sidebar === 'open' ? btn.dataset.labelClose : btn.dataset.labelOpen;
+    if (label) {
+      btn.setAttribute('aria-label', label);
+      btn.title = label;
+    }
+  };
+  const set = (state: 'open' | 'closed') => {
+    root.dataset.sidebar = state;
+    syncLabel();
+    if (!isMobile()) {
+      try {
+        localStorage.setItem(KEY, state);
+      } catch {
+        /* sin almacenamiento */
+      }
+    }
+  };
+  syncLabel();
+  for (const el of document.querySelectorAll('[data-sidebar-toggle]')) {
+    el.addEventListener('click', () => set(root.dataset.sidebar === 'open' ? 'closed' : 'open'));
+  }
+  for (const el of document.querySelectorAll('[data-sidebar-close]')) {
+    el.addEventListener('click', () => set('closed'));
+  }
+  // En móvil la barra es un cajón: al elegir un chat se cierra sola.
+  document.querySelector('aside.sidebar')?.addEventListener('click', (e) => {
+    if (isMobile() && (e.target as HTMLElement).closest('nav button, a')) set('closed');
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isMobile() && root.dataset.sidebar === 'open') set('closed');
+  });
+
+  // «Borrar todo» vive en la barra estática; la app (isla) escucha el evento.
+  document.querySelector('[data-clear-all]')?.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('icaro:clear-all'));
+  });
+
+  // Desplegables animados: <details> no anima solo, así que se anima la altura del cuerpo.
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for (const details of document.querySelectorAll<HTMLDetailsElement>('details.acc')) {
+    const summary = details.querySelector(':scope > summary');
+    const body = details.querySelector<HTMLElement>(':scope > .acc-body');
+    if (!summary || !body) continue;
+    let anim: Animation | null = null;
+    summary.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (reduce) {
+        details.open = !details.open;
+        return;
+      }
+      anim?.cancel();
+      const opening = !details.open;
+      if (opening) details.open = true;
+      const from = opening ? 0 : body.offsetHeight;
+      const to = opening ? body.offsetHeight : 0;
+      body.style.overflow = 'hidden';
+      anim = body.animate([{ height: `${from}px`, opacity: opening ? 0 : 1 }, { height: `${to}px`, opacity: opening ? 1 : 0 }], {
+        duration: 260,
+        easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+      });
+      anim.onfinish = () => {
+        if (!opening) details.open = false;
+        body.style.overflow = '';
+        anim = null;
+      };
+    });
+  }
+</script>

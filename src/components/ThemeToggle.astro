@@ -1,0 +1,87 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  light: string;
+  dark: string;
+}
+const { light, dark } = Astro.props;
+---
+
+<button
+  type="button"
+  id="theme-toggle"
+  data-label-light={light}
+  data-label-dark={dark}
+  aria-label={light}
+  title={light}
+  class="inline-flex size-9 items-center justify-center rounded-lg text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+>
+  <Icon name="solar:sun-2-linear" class="theme-sun size-5" />
+  <Icon name="solar:moon-linear" class="theme-moon size-5" />
+</button>
+
+<style>
+  .theme-moon {
+    display: none;
+  }
+  :global([data-theme='light']) .theme-moon {
+    display: block;
+  }
+  :global([data-theme='light']) .theme-sun {
+    display: none;
+  }
+</style>
+
+<script>
+  const KEY = 'icaro:theme';
+  const btn = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const sync = () => {
+    if (!btn) return;
+    const dark = root.dataset.theme !== 'light';
+    const label = dark ? btn.dataset.labelLight : btn.dataset.labelDark;
+    if (label) {
+      btn.setAttribute('aria-label', label);
+      btn.title = label;
+    }
+  };
+
+  const apply = (next: 'light' | 'dark') => {
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem(KEY, next);
+    } catch {
+      /* sin almacenamiento */
+    }
+    sync();
+  };
+
+  btn?.addEventListener('click', (e) => {
+    const next = root.dataset.theme === 'light' ? 'dark' : 'light';
+    // Sin View Transitions (o con movimiento reducido): cambio directo.
+    if (reduce || typeof document.startViewTransition !== 'function') {
+      apply(next);
+      return;
+    }
+    // Revelado circular desde el botón: la captura del tema nuevo se recorta con un círculo que crece.
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX || rect.left + rect.width / 2;
+    const y = e.clientY || rect.top + rect.height / 2;
+    const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+    root.classList.add('theme-switching');
+    const transition = document.startViewTransition(() => apply(next));
+    transition.ready
+      .then(() =>
+        root.animate(
+          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+          { duration: 550, easing: 'cubic-bezier(0.25, 1, 0.5, 1)', pseudoElement: '::view-transition-new(root)' },
+        ).finished,
+      )
+      .catch(() => {})
+      .finally(() => root.classList.remove('theme-switching'));
+  });
+  sync();
+</script>

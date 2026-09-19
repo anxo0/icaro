@@ -1,0 +1,471 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+/* El tema se controla con data-theme en <html>. Oscuro por defecto. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+/* Tokens semánticos: cambian con el tema y Tailwind los expone como colores (bg-paper, text-ink…). */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --shadow-card: var(--shadow-card);
+}
+
+:root {
+  --paper: #1c1c20;
+  --paper-2: #232327;
+  --surface: #26262b;
+  --surface-2: #2f2f35;
+  --ink: #ececee;
+  --ink-2: #a8a8b0;
+  --ink-3: #75757e;
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.22);
+  --accent: #6b8cff;
+  --accent-ink: #9db1ff;
+  --accent-soft: rgba(107, 140, 255, 0.16);
+  --ok: #6fd39a;
+  --ok-soft: rgba(63, 185, 120, 0.16);
+  --warn: #f0b458;
+  --warn-soft: rgba(240, 180, 88, 0.14);
+  --bad: #ff7b72;
+  --bad-soft: rgba(255, 123, 114, 0.14);
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04), 0 16px 40px -20px rgba(0, 0, 0, 0.6);
+  --glow: #8fa6ff;
+  --glow-2: #c9b8ff;
+  --glow-halo: 0.5;
+  --sidebar-w: 18rem;
+  color-scheme: dark;
+}
+
+/* Claro: grises fríos, sin blancos puros ni negros puros, para que no deslumbre. */
+:root[data-theme='light'] {
+  --paper: #e3e5ea;
+  --paper-2: #d8dbe2;
+  --surface: #edeff3;
+  --surface-2: #e4e7ed;
+  --ink: #26282f;
+  --ink-2: #5c606c;
+  --ink-3: #888c99;
+  --line: rgba(38, 40, 47, 0.1);
+  --line-strong: rgba(38, 40, 47, 0.24);
+  --accent: #3a62dc;
+  --accent-ink: #2b4cb3;
+  --accent-soft: rgba(58, 98, 220, 0.13);
+  --ok: #1f7a46;
+  --ok-soft: rgba(31, 122, 70, 0.14);
+  --warn: #9a5a00;
+  --warn-soft: rgba(154, 90, 0, 0.14);
+  --bad: #b3281f;
+  --bad-soft: rgba(179, 40, 31, 0.12);
+  --shadow-card: 0 1px 0 rgba(38, 40, 47, 0.04), 0 10px 30px -18px rgba(38, 40, 47, 0.28);
+  --glow: #4b70e6;
+  --glow-2: #8a6cff;
+  --glow-halo: 0.3;
+  color-scheme: light;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01', 'tnum';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  ::selection {
+    background: var(--accent);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+  svg[data-icon] {
+    display: inline-block;
+    vertical-align: -0.15em;
+  }
+}
+
+/* Cambio de tema: revelado circular con View Transitions (ver ThemeToggle.astro). Las capturas no se
+   funden entre sí; la nueva se recorta con un círculo que crece desde el botón. Mientras dura, se
+   desactivan las transiciones de color por elemento para que no cambie a trozos. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+}
+html.theme-switching * {
+  transition: none !important;
+}
+
+@utility hairline {
+  border: 1px solid var(--line);
+}
+@utility hairline-b {
+  border-bottom: 1px solid var(--line);
+}
+@utility hairline-t {
+  border-top: 1px solid var(--line);
+}
+@utility hairline-r {
+  border-right: 1px solid var(--line);
+}
+
+/* Etiqueta pequeña (sustituye a las monoespaciadas en mayúsculas) */
+@utility label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--ink-3);
+}
+
+/* Icono inline: hereda color y se alinea con el texto */
+.icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
+  vertical-align: -0.2em;
+}
+
+/* ── Shell: barra lateral plegable + área principal ────────────────────── */
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  min-height: 100dvh;
+  transition: grid-template-columns 0.3s var(--ease-out-quart);
+}
+html[data-sidebar='closed'] .shell {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--paper-2);
+  border-right: 1px solid var(--line);
+  transition:
+    opacity 0.2s ease,
+    border-color 0.3s ease;
+}
+html[data-sidebar='closed'] .sidebar {
+  border-color: transparent;
+  opacity: 0;
+  pointer-events: none;
+}
+.sidebar-inner {
+  width: var(--sidebar-w);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+/* Móvil: cajón sobre el contenido */
+@media (max-width: 1023px) {
+  .shell {
+    grid-template-columns: 0 minmax(0, 1fr);
+  }
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 40;
+    width: var(--sidebar-w);
+    max-width: 88vw;
+    transform: translateX(-100%);
+    transition:
+      transform 0.3s var(--ease-out-quart),
+      opacity 0.2s ease;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.35);
+  }
+  html[data-sidebar='open'] .sidebar {
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  html[data-sidebar='open'] .sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+/* Fuera del flujo siempre: si fuera un hijo normal del grid ocuparía una celda. */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+/* Un solo botón para plegar/desplegar: vive fuera del aside y viaja con su borde derecho. */
+.sidebar-toggle {
+  position: fixed;
+  top: 0.625rem;
+  left: calc(min(var(--sidebar-w), 88vw) - 2.75rem);
+  z-index: 45;
+  transition:
+    left 0.3s var(--ease-out-quart),
+    background-color 0.15s,
+    color 0.15s;
+}
+html[data-sidebar='closed'] .sidebar-toggle {
+  left: 0.75rem;
+}
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* Pantalla de bienvenida (estática) se oculta cuando hay un chat activo */
+html[data-chat='active'] #welcome {
+  display: none;
+}
+
+/* ── Desplegables animados (FAQ, secciones de la barra) ───────────────── */
+details.acc > summary {
+  list-style: none;
+  cursor: pointer;
+}
+details.acc > summary::-webkit-details-marker {
+  display: none;
+}
+details.acc > summary .chev {
+  transition: transform 0.3s var(--ease-out-quart);
+}
+details.acc[open] > summary .chev {
+  transform: rotate(180deg);
+}
+details.acc > .acc-body {
+  overflow: hidden;
+}
+
+/* ── Borde luminoso (cuadro de pregunta) ──────────────────────────────────
+   Dos destellos recorren el borde sin parar (no depende del ratón). */
+@property --glow-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes glow-spin {
+  to {
+    --glow-angle: 360deg;
+  }
+}
+.glow-border {
+  position: relative;
+  isolation: isolate;
+  --glow-angle: 0deg;
+}
+.glow-border::before,
+.glow-border::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--glow-angle),
+    var(--line-strong) 0%,
+    var(--glow) 10%,
+    var(--glow-2) 14%,
+    var(--line-strong) 26%,
+    var(--line-strong) 50%,
+    var(--glow) 60%,
+    var(--glow-2) 64%,
+    var(--line-strong) 76%,
+    var(--line-strong) 100%
+  );
+  animation: glow-spin 7s linear infinite;
+}
+.glow-border::after {
+  inset: -2px;
+  filter: blur(14px);
+  opacity: var(--glow-halo);
+}
+.glow-border > * {
+  position: relative;
+}
+
+/* ── Actividad del agente ─────────────────────────────────────────────── */
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+.shimmer {
+  background: linear-gradient(90deg, var(--ink-3) 0%, var(--ink) 45%, var(--ink-3) 90%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 1.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+/* Cursor de streaming */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.caret::after {
+  content: '▍';
+  margin-left: 1px;
+  color: var(--accent);
+  animation: blink 1s steps(1) infinite;
+}
+
+/* Entrada suave */
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.settle {
+  animation: settle 0.35s var(--ease-out-quart);
+}
+
+/* Texto de respuesta: respeta saltos de línea del modelo */
+.answer {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ── Visor de PDF: capa de texto de pdf.js (lo mínimo de pdf_viewer.css) ─── */
+.pdf-page {
+  --user-unit: 1;
+  --total-scale-factor: calc(var(--scale-factor, 1) * var(--user-unit));
+}
+.pdf-page canvas {
+  display: block;
+}
+.textLayer {
+  color-scheme: only light;
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  line-height: 1;
+  text-align: initial;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+}
+.textLayer :is(span, br) {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+  user-select: text;
+}
+.textLayer > :not(.markedContent),
+.textLayer .markedContent span:not(.markedContent) {
+  z-index: 1;
+  --font-height: 0;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  --scale-x: 1;
+  --rotate: 0deg;
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+}
+.textLayer .markedContent {
+  display: contents;
+}
+.textLayer ::selection {
+  background: rgba(58, 98, 220, 0.35);
+  color: transparent;
+}
+.textLayer br::selection {
+  background: transparent;
+}
+
+/* Cita [p. N] dentro de una respuesta */
+.cite {
+  font-size: 0.8em;
+  font-weight: 500;
+  padding: 0.05em 0.45em;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  cursor: pointer;
+  white-space: nowrap;
+  vertical-align: 0.08em;
+  transition: filter 0.15s;
+}
+.cite:hover {
+  filter: brightness(1.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-border::before,
+  .glow-border::after,
+  .shimmer,
+  .spin,
+  .settle,
+  .caret::after {
+    animation: none;
+  }
+  .shell,
+  .sidebar,
+  .sidebar-toggle,
+  details.acc > summary .chev {
+    transition: none;
+  }
+}
