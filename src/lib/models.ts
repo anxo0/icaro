@@ -30,12 +30,16 @@ export const DEFAULT_LLM: LlmKey = 'qwen';
  */
 export async function detectDevice(): Promise<Device> {
   if (typeof navigator === 'undefined' || !('gpu' in navigator) || !navigator.gpu) return 'wasm';
-  try {
-    const adapter = await navigator.gpu.requestAdapter();
-    return adapter ? 'webgpu' : 'wasm';
-  } catch {
-    return 'wasm';
+  // En portátiles con dos gráficas el adaptador por defecto a veces es null y el de alto rendimiento no.
+  for (const options of [undefined, { powerPreference: 'high-performance' as const }, { powerPreference: 'low-power' as const }]) {
+    try {
+      const adapter = await navigator.gpu.requestAdapter(options);
+      if (adapter) return 'webgpu';
+    } catch {
+      /* siguiente intento */
+    }
   }
+  return 'wasm';
 }
 
 /** Con menos de 4 GB, sugerir el modelo ligero. `deviceMemory` solo existe en Chromium. */
