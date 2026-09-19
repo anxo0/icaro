@@ -295,7 +295,7 @@ export default function IcaroApp({ t }: Props) {
   const showPreview = preview && doc !== null;
 
   return (
-    <div className="flex min-h-0 flex-1">
+    <div className={`flex min-h-0 ${hasChat ? 'flex-1' : 'flex-none lg:flex-1'}`}>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {hasChat && (
           <div className="mx-auto w-full max-w-3xl flex-1 space-y-7 px-4 pt-2 pb-6 sm:px-6">
@@ -376,7 +376,7 @@ export default function IcaroApp({ t }: Props) {
 
       {showPreview && (
         <aside
-          className="settle fixed inset-0 z-30 bg-paper lg:sticky lg:inset-auto lg:top-14 lg:h-[calc(100dvh-3.5rem)] lg:w-[44%] lg:max-w-3xl lg:min-w-[22rem] lg:border-l lg:border-line"
+          className="settle fixed inset-0 z-[46] bg-paper lg:sticky lg:z-auto lg:inset-auto lg:top-14 lg:h-[calc(100dvh-3.5rem)] lg:w-[44%] lg:max-w-3xl lg:min-w-[22rem] lg:border-l lg:border-line"
           aria-label={t.preview.open}
         >
           {doc.pdf ? (

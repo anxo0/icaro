@@ -130,7 +130,7 @@
   "app": {
     "prompt": {
       "placeholder": "Pregunta a Ícaro sobre el documento…",
-      "placeholderNoDoc": "Suelta un PDF aquí o púlsalo con + para empezar",
+      "placeholderNoDoc": "Suelta un PDF o pulsa +",
       "attach": "Adjuntar PDF",
       "send": "Enviar",
       "stop": "Parar",

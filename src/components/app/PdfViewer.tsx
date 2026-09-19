@@ -209,6 +209,7 @@ export function PdfViewer({ t, name, data, target, onMention, onClose }: Props) 
         className="scrollbar-thin relative min-h-0 flex-1 overflow-y-auto bg-paper-2"
         style={{ padding: PADDING }}
         onMouseUp={() => showPopover()}
+        onTouchEnd={() => setTimeout(() => showPopover(), 50)}
         onContextMenu={(e) => {
           if (showPopover(e.clientX, e.clientY)) e.preventDefault();
         }}

@@ -59,7 +59,7 @@ export function ModelMenu({ t, value, onChange, device, devicePref, gpuAvailable
         className="inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-xs text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink disabled:opacity-50"
       >
         <IconChip className={`size-3.5 ${device === 'webgpu' ? 'text-ok' : 'text-warn'}`} aria-hidden="true" />
-        <span>{name}</span>
+        <span className="whitespace-nowrap">{name}</span>
         <IconChevron className={`size-3 text-ink-3 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
 

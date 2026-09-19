@@ -202,10 +202,10 @@ html[data-sidebar='closed'] .sidebar {
   display: flex;
   flex-direction: column;
 }
-/* Móvil: cajón sobre el contenido */
+/* Móvil: la barra es un cajón fijo (fuera del flujo), así que el grid tiene una sola columna. */
 @media (max-width: 1023px) {
-  .shell {
-    grid-template-columns: 0 minmax(0, 1fr);
+  html[data-sidebar] .shell {
+    grid-template-columns: minmax(0, 1fr);
   }
   .sidebar {
     position: fixed;

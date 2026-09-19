@@ -130,7 +130,7 @@
   "app": {
     "prompt": {
       "placeholder": "Ask Ícaro about the document…",
-      "placeholderNoDoc": "Drop a PDF here or use + to get started",
+      "placeholderNoDoc": "Drop a PDF or press +",
       "attach": "Attach PDF",
       "send": "Send",
       "stop": "Stop",

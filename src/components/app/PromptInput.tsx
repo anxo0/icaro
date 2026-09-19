@@ -84,6 +84,7 @@ export function PromptInput({ t, doc, device, devicePref, gpuAvailable, onDevice
     el.style.height = 'auto';
     const h = Math.min(Math.max(el.scrollHeight, LINE * MIN_ROWS), LINE * MAX_ROWS);
     el.style.height = `${h}px`;
+    el.style.overflowY = el.scrollHeight > LINE * MAX_ROWS ? 'auto' : 'hidden';
   };
 
   const submit = (e?: FormEvent) => {
@@ -170,7 +171,7 @@ export function PromptInput({ t, doc, device, devicePref, gpuAvailable, onDevice
           placeholder={placeholder}
           aria-label={placeholder}
           disabled={generating}
-          className="max-h-48 w-full resize-none bg-transparent px-4 pt-3.5 pb-1 text-[15px] leading-6 placeholder:text-ink-3 focus:outline-none disabled:opacity-70"
+          className="max-h-48 w-full resize-none overflow-hidden bg-transparent px-4 pt-3.5 pb-1 text-[15px] leading-6 placeholder:text-ink-3 focus:outline-none disabled:opacity-70"
         />
         <div className="flex min-h-8 items-center gap-1 px-2 pb-2">
           <input
