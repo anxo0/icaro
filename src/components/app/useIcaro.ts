@@ -3,7 +3,7 @@ import { createClient, type Client } from '@/lib/rpc';
 import { cacheKey, clearDocs, clearModelCache, getDoc, putDoc } from '@/lib/cache';
 import { chatsStore, clearChats, newChatId, openChat, upsertChat, type Mention, type StoredChat, type StoredMessage } from '@/lib/chats';
 import { DEFAULT_LLM, EMBED_MODEL, LLM_MODELS, detectDevice, isLowMemory, sha256, type LlmKey } from '@/lib/models';
-import { buildMessages, ensureCitation, extractCitations, isGlobalQuestion, isNotFound } from '@/lib/prompt';
+import { buildMessages, ensureCitation, extractCitations, isGlobalQuestion, isNotFound, MAX_CONTEXT_TOKENS } from '@/lib/prompt';
 import { topK } from '@/lib/search';
 import { useStore } from '@/lib/store';
 import type { ChatMessage, Chunk, Device, Hit } from '@/lib/types';
@@ -572,12 +572,27 @@ export function useIcaro() {
         const hits = [...mentioned, ...opening, ...found].filter((h) => !seen.has(h.id) && seen.add(h.id));
         patch({ sources: hits, phase: 'write' });
 
+        const generate = (maxContextTokens?: number) =>
+          ensureWorkers().llm.call(
+            'generate',
+            { messages: buildMessages(q, hits, { mentions, maxContextTokens }) },
+            { onEvent: ({ token }) => setMessages((m) => m.map((msg) => (msg.id === answerId ? { ...msg, content: msg.content + token } : msg))) },
+          );
         await loadLlm(llmKey);
-        const result = await ensureWorkers().llm.call(
-          'generate',
-          { messages: buildMessages(q, hits, { mentions }) },
-          { onEvent: ({ token }) => setMessages((m) => m.map((msg) => (msg.id === answerId ? { ...msg, content: msg.content + token } : msg))) },
-        );
+        let result: Awaited<ReturnType<typeof generate>>;
+        try {
+          result = await generate();
+        } catch (err) {
+          // Un trap de WASM («table index is out of bounds», «unreachable») deja la sesión de ONNX
+          // inservible: se reinicia el worker y se reintenta una vez con la mitad de contexto.
+          console.warn('[icaro] generation failed, restarting the model worker', err);
+          respawn('llm');
+          llmReady.current = null;
+          llmLoadedKey.current = null;
+          patch({ content: '' });
+          await loadLlm(llmKey);
+          result = await generate(Math.floor(MAX_CONTEXT_TOKENS / 2));
+        }
         const text = ensureCitation(result.text.trim(), hits);
         const finished: Partial<Message> = {
           content: text,
@@ -595,11 +610,16 @@ export function useIcaro() {
         });
       } catch (err) {
         patch({ phase: 'error', finishedAt: Date.now(), error: err instanceof Error ? err.message : String(err) });
+        // Que la siguiente pregunta arranque con un worker limpio.
+        respawn('llm');
+        llmReady.current = null;
+        llmLoadedKey.current = null;
+        setLlmModel(IDLE_MODEL);
       } finally {
         setBusy(false);
       }
     },
-    [busy, ensureWorkers, loadEmbed, loadLlm, llmKey, persist],
+    [busy, ensureWorkers, loadEmbed, loadLlm, llmKey, persist, respawn],
   );
 
   // Solo en desarrollo: permite probar prompts desde la consola sin pasar por la UI.

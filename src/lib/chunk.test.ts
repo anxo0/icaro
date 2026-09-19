@@ -81,7 +81,7 @@ describe('chunkPage', () => {
     const chunks = chunkPage(longText(80));
     const big = chunks.slice(0, -1);
     for (const c of big) expect(estimateTokens(c)).toBeGreaterThan(250);
-    for (const c of big) expect(estimateTokens(c)).toBeLessThanOrEqual(350);
+    for (const c of big) expect(estimateTokens(c)).toBeLessThanOrEqual(400);
   });
 });
 

@@ -102,7 +102,7 @@ export function chunkDocument(pages: PageText[], opts: ChunkOptions = DEFAULT_CH
   return chunks;
 }
 
-/** Estimación grosera de tokens para textos en español/inglés (~3,5 caracteres por token). */
+/** Estimación grosera de tokens para textos en español (~3 caracteres por token con el tokenizador de Qwen). */
 export function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 3.5);
+  return Math.ceil(text.length / 3);
 }

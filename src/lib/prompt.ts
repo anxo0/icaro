@@ -31,8 +31,11 @@ export const GENERATION = {
   do_sample: false,
 } as const;
 
-/** Presupuesto de contexto para los fragmentos: un 0.5B se pierde con más. */
-export const MAX_CONTEXT_TOKENS = 1500;
+/**
+ * Presupuesto de contexto para los fragmentos. Un 0.5B se pierde con más y, en WebGPU, prompts de
+ * ~2.000 tokens han tumbado la sesión de ONNX («table index is out of bounds»).
+ */
+export const MAX_CONTEXT_TOKENS = 1100;
 
 export interface PromptOptions {
   maxContextTokens?: number;
@@ -60,7 +63,7 @@ export function fitContext<T extends Fragment>(chunks: T[], maxTokens = MAX_CONT
       kept.push(c);
       used += cost;
     } else if (kept.length === 0) {
-      const room = Math.max(0, Math.floor(maxTokens * 3.5) - `[p. ${c.page}] `.length);
+      const room = Math.max(0, Math.floor(maxTokens * 3) - `[p. ${c.page}] `.length);
       kept.push({ ...c, text: c.text.slice(0, room) });
       break;
     }
