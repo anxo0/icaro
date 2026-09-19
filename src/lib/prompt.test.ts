@@ -100,3 +100,19 @@ describe('ensureCitation', () => {
     expect(ensureCitation('Hola.', chunks)).toBe('Hola.');
   });
 });
+
+describe('buildMessages con menciones', () => {
+  it('señala el fragmento y marca la pregunta como referida a él', () => {
+    const mention = chunk(1, 'augue dui. Proin in vestibulum ipsum.');
+    const msgs = buildMessages('que significa esto', [mention, chunk(3, 'otro')], { mentions: [mention] });
+    const user = msgs.at(-1)!.content;
+    expect(user).toContain('El usuario señala este fragmento de la página 1: «augue dui. Proin in vestibulum ipsum.»');
+    expect(user.endsWith('Pregunta (sobre el fragmento señalado): que significa esto')).toBe(true);
+  });
+
+  it('sin menciones no añade nada', () => {
+    const user = buildMessages('hola', [chunk(2, 'x')]).at(-1)!.content;
+    expect(user).not.toContain('señala');
+    expect(user.endsWith('Pregunta: hola')).toBe(true);
+  });
+});

@@ -572,7 +572,7 @@ export function useIcaro() {
         await loadLlm(llmKey);
         const result = await ensureWorkers().llm.call(
           'generate',
-          { messages: buildMessages(q, hits) },
+          { messages: buildMessages(q, hits, { mentions }) },
           { onEvent: ({ token }) => setMessages((m) => m.map((msg) => (msg.id === answerId ? { ...msg, content: msg.content + token } : msg))) },
         );
         const text = ensureCitation(result.text.trim(), hits);

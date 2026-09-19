@@ -36,6 +36,8 @@ export const MAX_CONTEXT_TOKENS = 1500;
 
 export interface PromptOptions {
   maxContextTokens?: number;
+  /** Fragmentos que el usuario ha señalado en el visor: la pregunta va sobre ellos. */
+  mentions?: Fragment[];
 }
 
 type Fragment = Pick<Chunk, 'page' | 'text'>;
@@ -66,11 +68,18 @@ export function fitContext<T extends Fragment>(chunks: T[], maxTokens = MAX_CONT
   return kept;
 }
 
-/** Monta los mensajes para `tokenizer.apply_chat_template`: system, dos ejemplos y la pregunta real. */
+/**
+ * Monta los mensajes para `tokenizer.apply_chat_template`: system, dos ejemplos y la pregunta real.
+ * Si el usuario ha señalado un fragmento, se dice explícitamente: un 0.5B no deduce a qué se
+ * refiere «esto» aunque el fragmento esté entre los del contexto.
+ */
 export function buildMessages(question: string, chunks: Fragment[], opts: PromptOptions = {}): ChatMessage[] {
   const fitted = fitContext(chunks, opts.maxContextTokens);
   const fragments = fitted.map(formatFragment).join('\n');
-  const user = `Fragmentos:\n${fragments}\n\nPregunta: ${question.trim()}`;
+  const mentions = opts.mentions ?? [];
+  const pointed = mentions.map((m) => `El usuario señala este fragmento de la página ${m.page}: «${m.text}»`).join('\n');
+  const ask = mentions.length > 0 ? `Pregunta (sobre el fragmento señalado): ${question.trim()}` : `Pregunta: ${question.trim()}`;
+  const user = [`Fragmentos:\n${fragments}`, pointed, ask].filter(Boolean).join('\n\n');
   return [{ role: 'system', content: SYSTEM_PROMPT }, ...FEW_SHOT, { role: 'user', content: user }];
 }
 
