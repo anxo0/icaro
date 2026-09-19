@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMessages, ensureCitation, extractCitations, FEW_SHOT, fitContext, formatFragment, isNotFound, NOT_FOUND, SYSTEM_PROMPT } from './prompt';
+import { buildMessages, ensureCitation, extractCitations, FEW_SHOT, fitContext, formatFragment, isGlobalQuestion, isNotFound, NOT_FOUND, SYSTEM_PROMPT } from './prompt';
 
 const chunk = (page: number, text: string) => ({ page, text });
 
@@ -114,5 +114,16 @@ describe('buildMessages con menciones', () => {
     const user = buildMessages('hola', [chunk(2, 'x')]).at(-1)!.content;
     expect(user).not.toContain('señala');
     expect(user.endsWith('Pregunta: hola')).toBe(true);
+  });
+});
+
+describe('isGlobalQuestion', () => {
+  it('reconoce preguntas sobre el documento entero en español e inglés', () => {
+    for (const q of ['¿De qué trata?', 'Resume en 5 puntos', 'resumeme este documento', 'What is this document about?', 'Summarize it', 'ideas principales'])
+      expect(isGlobalQuestion(q)).toBe(true);
+  });
+
+  it('no se dispara con preguntas concretas', () => {
+    for (const q of ['¿Cuál es el presupuesto?', '¿Qué fechas aparecen?', 'Who is the technical lead?']) expect(isGlobalQuestion(q)).toBe(false);
   });
 });

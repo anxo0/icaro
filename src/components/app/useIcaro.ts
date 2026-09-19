@@ -3,7 +3,7 @@ import { createClient, type Client } from '@/lib/rpc';
 import { cacheKey, clearDocs, clearModelCache, getDoc, putDoc } from '@/lib/cache';
 import { chatsStore, clearChats, newChatId, openChat, upsertChat, type Mention, type StoredChat, type StoredMessage } from '@/lib/chats';
 import { DEFAULT_LLM, EMBED_MODEL, LLM_MODELS, detectDevice, isLowMemory, sha256, type LlmKey } from '@/lib/models';
-import { buildMessages, ensureCitation, extractCitations, isNotFound } from '@/lib/prompt';
+import { buildMessages, ensureCitation, extractCitations, isGlobalQuestion, isNotFound } from '@/lib/prompt';
 import { topK } from '@/lib/search';
 import { useStore } from '@/lib/store';
 import type { ChatMessage, Chunk, Device, Hit } from '@/lib/types';
@@ -566,7 +566,10 @@ export function useIcaro() {
             return chunk ? { ...chunk, score } : null;
           })
           .filter((h): h is Hit => h !== null);
-        const hits = [...mentioned, ...found];
+        // «¿De qué trata?» / «resume»: el principio del documento (título, intro) va primero.
+        const opening: Hit[] = isGlobalQuestion(q) ? current.chunks.slice(0, 3).map((c) => ({ ...c, score: 1 })) : [];
+        const seen = new Set<number>();
+        const hits = [...mentioned, ...opening, ...found].filter((h) => !seen.has(h.id) && seen.add(h.id));
         patch({ sources: hits, phase: 'write' });
 
         await loadLlm(llmKey);

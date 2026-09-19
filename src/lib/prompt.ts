@@ -81,9 +81,20 @@ export function buildMessages(question: string, chunks: Fragment[], opts: Prompt
   const ask =
     mentions.length > 0
       ? `Pregunta (sobre el fragmento señalado; explícalo con tus palabras y en el idioma de la pregunta, no lo copies): ${question.trim()}`
-      : `Pregunta: ${question.trim()}`;
+      : isGlobalQuestion(question)
+        ? `Pregunta (resume lo que dicen los fragmentos en 3-5 frases o puntos, citando la página de cada uno): ${question.trim()}`
+        : `Pregunta: ${question.trim()}`;
   const user = [`Fragmentos:\n${fragments}`, pointed, ask].filter(Boolean).join('\n\n');
   return [{ role: 'system', content: SYSTEM_PROMPT }, ...FEW_SHOT, { role: 'user', content: user }];
+}
+
+/**
+ * Preguntas sobre el documento entero («¿de qué trata?», «resume…»): buscar por similitud no sirve
+ * porque la pregunta no se parece a ningún trozo; conviene usar además el principio del documento.
+ */
+export function isGlobalQuestion(question: string): boolean {
+  const q = question.toLowerCase();
+  return /\b(de qu[eé] (trata|va|habla)|res[uú]m|sintetiza|s[ií]ntesis|idea(s)? principal|puntos? (clave|principales)|tema(s)? principal|summar|overview|what is (this|it|the document|this document|this pdf) about|main (points|ideas|topics)|tl;?dr)/u.test(q);
 }
 
 /** ¿La respuesta es el «no lo encuentro» del prompt? Tolera comillas, punto final y mayúsculas. */
