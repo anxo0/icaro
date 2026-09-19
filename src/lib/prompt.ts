@@ -78,7 +78,10 @@ export function buildMessages(question: string, chunks: Fragment[], opts: Prompt
   const fragments = fitted.map(formatFragment).join('\n');
   const mentions = opts.mentions ?? [];
   const pointed = mentions.map((m) => `El usuario señala este fragmento de la página ${m.page}: «${m.text}»`).join('\n');
-  const ask = mentions.length > 0 ? `Pregunta (sobre el fragmento señalado): ${question.trim()}` : `Pregunta: ${question.trim()}`;
+  const ask =
+    mentions.length > 0
+      ? `Pregunta (sobre el fragmento señalado; explícalo con tus palabras y en el idioma de la pregunta, no lo copies): ${question.trim()}`
+      : `Pregunta: ${question.trim()}`;
   const user = [`Fragmentos:\n${fragments}`, pointed, ask].filter(Boolean).join('\n\n');
   return [{ role: 'system', content: SYSTEM_PROMPT }, ...FEW_SHOT, { role: 'user', content: user }];
 }

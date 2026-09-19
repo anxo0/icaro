@@ -107,7 +107,7 @@ describe('buildMessages con menciones', () => {
     const msgs = buildMessages('que significa esto', [mention, chunk(3, 'otro')], { mentions: [mention] });
     const user = msgs.at(-1)!.content;
     expect(user).toContain('El usuario señala este fragmento de la página 1: «augue dui. Proin in vestibulum ipsum.»');
-    expect(user.endsWith('Pregunta (sobre el fragmento señalado): que significa esto')).toBe(true);
+    expect(user).toMatch(/Pregunta \(sobre el fragmento señalado[^)]*\): que significa esto$/);
   });
 
   it('sin menciones no añade nada', () => {

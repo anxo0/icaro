@@ -182,7 +182,7 @@
       "searchStep": "Buscar en el documento",
       "searchDetail": "{n} fragmentos",
       "writeStep": "Redactar la respuesta",
-      "answered": "Fuentes ({n}) · {sec} s",
+      "answered": "Fuentes ({n})",
       "answeredNone": "Sin fuentes",
       "failed": "Algo ha fallado",
       "noText": "Ícaro no encuentra texto en este PDF. Si es un escaneo, no puede leerlo sin OCR.",
@@ -202,7 +202,8 @@
       "interrupted": "parado",
       "stats": "{tokens} tokens · {sec} s",
       "sourcesLead": "Fragmentos usados en esta respuesta",
-      "page": "p. {n}"
+      "page": "p. {n}",
+      "took": "Tardó {t}"
     },
     "list": {
       "title": "Chats",

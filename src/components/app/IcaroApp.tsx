@@ -25,6 +25,15 @@ function seconds(from: number, to: number): string {
   return ((to - from) / 1000).toFixed(1);
 }
 
+/** «5 min 30 s» o «12,4 s». */
+function duration(ms: number): string {
+  const total = Math.round(ms / 1000);
+  if (total < 60) return `${(ms / 1000).toFixed(1)} s`;
+  const min = Math.floor(total / 60);
+  const sec = total % 60;
+  return sec > 0 ? `${min} min ${sec} s` : `${min} min`;
+}
+
 function isPdf(file: File): boolean {
   return file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
 }
@@ -169,10 +178,9 @@ function AssistantMessage({ t, m, highlight, onCite }: { t: AppStrings; m: Messa
     { key: 'search', label: a.searchStep, status: m.phase === 'search' ? 'active' : 'done', detail: m.phase !== 'search' ? fmt(a.searchDetail, { n }) : undefined },
     { key: 'write', label: a.writeStep, status: m.phase === 'search' ? 'pending' : m.phase === 'write' ? 'active' : m.phase === 'error' ? 'error' : 'done' },
   ];
-  const summary =
-    m.phase === 'error'
-      ? `${a.failed}: ${m.error ?? ''}`
-      : `${n > 0 ? fmt(a.answered, { n, sec: m.startedAt && m.finishedAt ? seconds(m.startedAt, m.finishedAt) : m.stats ? (m.stats.ms / 1000).toFixed(1) : '–' }) : a.answeredNone}${m.interrupted ? ` · ${t.chat.interrupted}` : ''}`;
+  const summary = m.phase === 'error' ? `${a.failed}: ${m.error ?? ''}` : n > 0 ? fmt(a.answered, { n }) : a.answeredNone;
+  // Tiempo total de la respuesta (búsqueda + generación); al reabrir un chat solo queda el de generación.
+  const elapsed = m.startedAt && m.finishedAt ? m.finishedAt - m.startedAt : m.stats?.ms;
 
   return (
     <div className="settle flex gap-3">
@@ -184,6 +192,12 @@ function AssistantMessage({ t, m, highlight, onCite }: { t: AppStrings; m: Messa
         {(m.content || m.phase === 'done') && (
           <p className={`answer mt-1 text-[15px] leading-7 ${m.phase === 'write' ? 'caret' : ''} ${m.notFound ? 'text-ink-2 italic' : ''}`}>
             {m.notFound ? t.chat.notFound : <Answer text={m.content} onCite={onCite} />}
+          </p>
+        )}
+        {m.phase === 'done' && elapsed !== undefined && (
+          <p className="mt-1.5 text-xs text-ink-3">
+            {fmt(t.chat.took, { t: duration(elapsed) })}
+            {m.interrupted && ` · ${t.chat.interrupted}`}
           </p>
         )}
       </div>

@@ -182,7 +182,7 @@
       "searchStep": "Search the document",
       "searchDetail": "{n} passages",
       "writeStep": "Write the answer",
-      "answered": "Sources ({n}) · {sec} s",
+      "answered": "Sources ({n})",
       "answeredNone": "No sources",
       "failed": "Something went wrong",
       "noText": "Ícaro can't find any text in this PDF. If it's a scan, it can't read it without OCR.",
@@ -202,7 +202,8 @@
       "interrupted": "stopped",
       "stats": "{tokens} tokens · {sec} s",
       "sourcesLead": "Passages used for this answer",
-      "page": "p. {n}"
+      "page": "p. {n}",
+      "took": "Took {t}"
     },
     "list": {
       "title": "Chats",
