@@ -295,7 +295,7 @@ export default function IcaroApp({ t }: Props) {
   const showPreview = preview && doc !== null;
 
   return (
-    <div className={`flex min-h-0 ${hasChat ? 'flex-1' : 'mb-auto flex-none lg:mb-0 lg:flex-1'}`}>
+    <div className={`flex min-h-0 ${hasChat ? 'flex-1' : 'flex-none lg:flex-1'}`}>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {hasChat && (
           <div className="mx-auto w-full max-w-3xl flex-1 space-y-7 px-4 pt-2 pb-6 sm:px-6">
